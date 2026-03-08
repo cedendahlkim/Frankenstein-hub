@@ -8,7 +8,7 @@ export const auth0 = initAuth0({
   clientSecret: process.env.AUTH0_CLIENT_SECRET,
   authorizationParams: {
     audience: process.env.AUTH0_AUDIENCE,
-    scope: 'openid profile email offline_access read:me:connected_accounts create:me:connected_accounts invoke:analyst invoke:creativist invoke:critic publish:article',
+    scope: 'openid profile email offline_access',
   },
   routes: {
     callback: '/api/auth/callback',
