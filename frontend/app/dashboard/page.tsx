@@ -138,6 +138,9 @@ export default function Dashboard() {
                 onInvoke={() =>
                   handleInvokeAgent('/agents/creativist/draft', 'creativist')
                 }
+                onPublish={() =>
+                  handleInvokeAgent('/agents/creativist/publish', 'creativist')
+                }
                 requiresStepUp={true}
               />
               <AgentCard

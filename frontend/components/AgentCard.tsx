@@ -11,6 +11,7 @@ interface AgentCardProps {
   isConnected: boolean;
   onConnect?: () => void;
   onInvoke: () => Promise<void>;
+  onPublish?: () => Promise<void>;
   requiresStepUp?: boolean;
   isCibaFlow?: boolean;
 }
@@ -56,10 +57,12 @@ export default function AgentCard({
   isConnected,
   onConnect,
   onInvoke,
+  onPublish,
   requiresStepUp,
   isCibaFlow,
 }: AgentCardProps) {
   const [isExecuting, setIsExecuting] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const [lastResult, setLastResult] = useState<'success' | 'error' | null>(null);
 
   const handleInvoke = async () => {
@@ -72,6 +75,18 @@ export default function AgentCard({
       setLastResult('error');
     } finally {
       setIsExecuting(false);
+    }
+  };
+
+  const handlePublish = async () => {
+    if (!onPublish) return;
+    setIsPublishing(true);
+    try {
+      await onPublish();
+    } catch {
+      // step-up redirect will handle this
+    } finally {
+      setIsPublishing(false);
     }
   };
 
@@ -171,6 +186,30 @@ export default function AgentCard({
             </>
           )}
         </button>
+
+        {onPublish && (
+          <button
+            onClick={handlePublish}
+            disabled={!isConnected || isPublishing || isExecuting}
+            className={`w-full mt-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+              isConnected && !isPublishing && !isExecuting
+                ? 'bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-300 border border-yellow-700/40 hover:border-yellow-600/60'
+                : 'btn-disabled text-xs'
+            }`}
+          >
+            {isPublishing ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                Verifying MFA...
+              </>
+            ) : (
+              <>
+                <Fingerprint className="w-3.5 h-3.5" />
+                Publish Article (Step-Up MFA)
+              </>
+            )}
+          </button>
+        )}
       </div>
     </div>
   );
