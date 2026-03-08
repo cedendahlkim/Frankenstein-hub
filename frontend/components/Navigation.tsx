@@ -46,7 +46,7 @@ export default function Navigation() {
             </>
           ) : !isLoading ? (
             <a
-              href="/api/auth/login"
+              href="/api/auth/login?returnTo=/dashboard"
               className="btn-primary text-sm py-2 px-4"
             >
               Sign In
