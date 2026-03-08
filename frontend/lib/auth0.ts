@@ -14,4 +14,10 @@ export const auth0 = initAuth0({
     callback: '/api/auth/callback',
     postLogoutRedirect: '/',
   },
+  session: {
+    cookie: {
+      sameSite: 'lax',
+    },
+  },
+  httpTimeout: 10000,
 });
