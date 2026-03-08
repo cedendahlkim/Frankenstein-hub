@@ -81,22 +81,70 @@ export default function Dashboard() {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-400 mb-4">Authentication required</p>
-          <a href="/api/auth/login" className="btn-primary">
-            Sign In
-          </a>
-        </div>
-      </div>
-    );
-  }
+  const isDemo = !user;
+
+  const demoConnections: ConnectedAccount[] = [
+    { connection: 'google-oauth2', provider: 'Google', created_at: '2026-03-07T10:00:00Z' },
+    { connection: 'github', provider: 'GitHub', created_at: '2026-03-07T10:05:00Z' },
+  ];
+
+  const activeConnections = isDemo ? demoConnections : connections;
+  const activeHasGoogle = isDemo ? true : hasGoogle;
+  const activeHasGithub = isDemo ? true : hasGithub;
+
+  const handleDemoInvoke = async (endpoint: string, agentName: string) => {
+    addLog(agentName, 'INVOKE', 'pending', `POST ${endpoint}`);
+    await new Promise((r) => setTimeout(r, 800));
+
+    if (endpoint.includes('publish')) {
+      addLog(agentName, 'TOKEN_EXCHANGE', 'success', 'RFC 8693 → github access_token (expires: 28800s)');
+      await new Promise((r) => setTimeout(r, 600));
+      addLog(agentName, 'STEP_UP_REQUIRED', 'pending', 'publish:article scope → MFA challenge initiated');
+      setStepUpAction(endpoint);
+      setShowStepUp(true);
+      return;
+    }
+
+    if (agentName === 'analyst') {
+      addLog(agentName, 'TOKEN_EXCHANGE', 'success', 'RFC 8693 → google-oauth2 access_token (expires: 3600s)');
+      await new Promise((r) => setTimeout(r, 500));
+      addLog(agentName, 'API_CALL', 'success', 'GET /drive/v3/files → 200 OK (12 items)');
+    } else if (agentName === 'creativist') {
+      addLog(agentName, 'TOKEN_EXCHANGE', 'success', 'RFC 8693 → github access_token (expires: 28800s)');
+      await new Promise((r) => setTimeout(r, 500));
+      addLog(agentName, 'API_CALL', 'success', 'GET /user/repos?sort=updated → 200 OK (5 repos)');
+    } else if (agentName === 'critic') {
+      addLog(agentName, 'CIBA_INIT', 'pending', 'bc-authorize → auth_req_id: ciba_demo_12345');
+      await new Promise((r) => setTimeout(r, 1500));
+      addLog(agentName, 'CIBA_POLL', 'pending', 'Awaiting Guardian push notification approval...');
+      await new Promise((r) => setTimeout(r, 2000));
+      addLog(agentName, 'CIBA_APPROVED', 'success', 'User approved via push notification → access_token issued');
+    }
+
+    await new Promise((r) => setTimeout(r, 300));
+    addLog(agentName, 'COMPLETE', 'success', `Task executed successfully (demo mode)`);
+  };
+
+  const invokeHandler = isDemo ? handleDemoInvoke : handleInvokeAgent;
 
   return (
     <div className="min-h-screen p-8">
       <div className="max-w-6xl mx-auto">
+        {isDemo && (
+          <div className="mb-6 bg-yellow-900/20 border border-yellow-700/30 rounded-xl px-5 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-yellow-400 text-lg">⚡</span>
+              <div>
+                <p className="text-yellow-300 text-sm font-medium">Demo Mode</p>
+                <p className="text-yellow-400/60 text-xs">Simulated auth flows — sign in with Auth0 for live data</p>
+              </div>
+            </div>
+            <a href="/api/auth/login" className="text-xs bg-yellow-600/30 hover:bg-yellow-600/40 text-yellow-300 px-4 py-1.5 rounded-lg border border-yellow-700/40 transition-colors">
+              Sign In
+            </a>
+          </div>
+        )}
+
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">
             Multi-Agent Authorization Hub
@@ -116,13 +164,13 @@ export default function Dashboard() {
                 identifier="analyst"
                 provider="Google Workspace"
                 description="Executes data analysis operations via Google Drive and Sheets using ephemeral Token Vault credentials."
-                isConnected={hasGoogle}
+                isConnected={activeHasGoogle}
                 onConnect={() =>
                   (window.location.href =
                     '/api/auth/login?connection=google-oauth2')
                 }
                 onInvoke={() =>
-                  handleInvokeAgent('/agents/analyst/execute', 'analyst')
+                  invokeHandler('/agents/analyst/execute', 'analyst')
                 }
               />
               <AgentCard
@@ -130,16 +178,16 @@ export default function Dashboard() {
                 identifier="creativist"
                 provider="GitHub"
                 description="Generates and publishes content via GitHub. High-value publish actions require Step-Up MFA."
-                isConnected={hasGithub}
+                isConnected={activeHasGithub}
                 onConnect={() =>
                   (window.location.href =
                     '/api/auth/login?connection=github')
                 }
                 onInvoke={() =>
-                  handleInvokeAgent('/agents/creativist/draft', 'creativist')
+                  invokeHandler('/agents/creativist/draft', 'creativist')
                 }
                 onPublish={() =>
-                  handleInvokeAgent('/agents/creativist/publish', 'creativist')
+                  invokeHandler('/agents/creativist/publish', 'creativist')
                 }
                 requiresStepUp={true}
               />
@@ -150,7 +198,7 @@ export default function Dashboard() {
                 description="Reviews and executes destructive background operations. Requires asynchronous CIBA consent via push notification."
                 isConnected={true}
                 onInvoke={() =>
-                  handleInvokeAgent('/agents/critic/review', 'critic')
+                  invokeHandler('/agents/critic/review', 'critic')
                 }
                 isCibaFlow={true}
               />
@@ -160,8 +208,8 @@ export default function Dashboard() {
           {/* Consent Manager Sidebar */}
           <div className="lg:col-span-1">
             <ConsentManager
-              connections={connections}
-              onRefresh={loadConnections}
+              connections={activeConnections}
+              onRefresh={isDemo ? async () => {} : loadConnections}
             />
           </div>
         </div>
