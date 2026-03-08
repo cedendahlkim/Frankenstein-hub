@@ -3,7 +3,7 @@ Description=Frankenstein Next.js Frontend
 After=network.target
 
 [Service]
-User=deploy
+User=root
 WorkingDirectory=/var/www/frankenstein-hub/frontend
 Environment="NODE_ENV=production"
 Environment="PORT=3000"

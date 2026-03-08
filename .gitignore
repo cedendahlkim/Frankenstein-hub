@@ -25,6 +25,8 @@ Thumbs.db
 # Rust
 **/*.rs.bk
 *.pdb
+backend/frankenstein_api
+backend/Dockerfile.build
 
 # Logs
 *.log

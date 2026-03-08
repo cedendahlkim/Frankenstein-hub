@@ -3,9 +3,9 @@ Description=Frankenstein Rust Axum API
 After=network.target postgresql.service
 
 [Service]
-User=deploy
+User=root
 WorkingDirectory=/var/www/frankenstein-hub/backend
-ExecStart=/home/deploy/.cargo/bin/cargo run --release
+ExecStart=/var/www/frankenstein-hub/backend/target/release/frankenstein_api
 EnvironmentFile=/var/www/frankenstein-hub/backend/.env
 Restart=always
 RestartSec=3
