@@ -1,6 +1,26 @@
 # PROGRESS.md — Aktuell status & återstående arbete
 
-> Uppdateras efter varje session. Senast uppdaterad: **2026-03-08 07:50 CET**
+> Uppdateras efter varje session. Senast uppdaterad: **2026-03-08 08:15 CET**
+
+## Session 2 (2026-03-08)
+
+### Utfört ✅
+
+1. **Rust toolchain installerat** — Rust 1.94.0 (stable) via rustup
+2. **Backend kompilerar** — `cargo check` OK efter fixar:
+   - Bytt `sqlx::migrate!` (compile-time) till `sqlx::migrate::Migrator` (runtime) — slipper `DATABASE_URL` vid kompilering
+   - Fixat borrow checker-fel i `jwt_validator.rs` — token klonades tidigt för att undvika immutable/mutable borrow-konflikt
+   - Fixat `routes.rs` — creativist draft/publish separerade till egna Routers med rätt scope-middleware, sedan mergade
+   - Tagit bort oanvänd import (`axum::Router` i main.rs)
+   - Prefixat oanvänd variabel (`_ciba_token` i critic_handler.rs)
+3. **Frontend bygger** — `next build` OK, inga TypeScript- eller lint-fel
+4. **PostgreSQL via Docker** — `frankenstein-pg` container (postgres:16-alpine) körs på port 5432
+5. **Backend startar** — `cargo run` OK, ansluter till DB, kör migrationer, `/health` svarar `OK`
+6. **Frontend dev-server** — `next dev` körs på port 3000
+
+### Kvarvarande varningar (icke-blockerande)
+- 5 dead_code-varningar i Rust (oanvända structs/funktioner som kommer användas senare)
+- `sqlx-postgres v0.7.4` future-incompat warning (uppgradera till 0.8 senare)
 
 ## Session 1 (2026-03-08)
 

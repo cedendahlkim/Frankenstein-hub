@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-use axum::Router;
 use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
 use tower_http::cors::{Any, CorsLayer};
@@ -30,8 +29,10 @@ async fn main() {
         .await
         .expect("Database connection failed");
 
-    // Run migrations
-    sqlx::migrate!("./migrations")
+    // Run migrations at runtime (avoids compile-time DATABASE_URL requirement)
+    sqlx::migrate::Migrator::new(std::path::Path::new("./migrations"))
+        .await
+        .expect("Failed to read migrations")
         .run(&db)
         .await
         .expect("Failed to run migrations");

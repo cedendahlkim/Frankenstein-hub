@@ -15,7 +15,7 @@ pub async fn review_and_execute(
     // Initiate CIBA flow for background consent
     let action_message = "Critic Agent requests permission to execute destructive review action";
 
-    let ciba_token = crate::services::ciba_orchestrator::trigger_and_poll_ciba(
+    let _ciba_token = crate::services::ciba_orchestrator::trigger_and_poll_ciba(
         &state,
         &claims.sub,
         action_message,

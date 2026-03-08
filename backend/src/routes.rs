@@ -20,14 +20,16 @@ pub fn create_router(state: Arc<AppState>) -> Router {
             require_scope("invoke:analyst".to_string(), req, next)
         }));
 
-    let creativist_routes = Router::new()
+    let creativist_draft = Router::new()
         .route(
             "/draft",
             post(creativist_handler::draft_content),
         )
         .layer(middleware::from_fn(move |req, next| {
             require_scope("invoke:creativist".to_string(), req, next)
-        }))
+        }));
+
+    let creativist_publish = Router::new()
         .route(
             "/publish",
             post(creativist_handler::publish_article),
@@ -35,6 +37,8 @@ pub fn create_router(state: Arc<AppState>) -> Router {
         .layer(middleware::from_fn(move |req, next| {
             require_scope("publish:article".to_string(), req, next)
         }));
+
+    let creativist_routes = creativist_draft.merge(creativist_publish);
 
     let critic_routes = Router::new()
         .route(

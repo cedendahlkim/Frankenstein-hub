@@ -22,15 +22,13 @@ pub async fn require_scope(
     mut req: Request,
     next: Next,
 ) -> Result<impl IntoResponse, StatusCode> {
-    let auth_header = req
+    let token = req
         .headers()
         .get("Authorization")
-        .and_then(|h| h.to_str().ok());
-
-    let token = match auth_header {
-        Some(h) if h.starts_with("Bearer ") => h.trim_start_matches("Bearer "),
-        _ => return Err(StatusCode::UNAUTHORIZED),
-    };
+        .and_then(|h| h.to_str().ok())
+        .and_then(|h| h.strip_prefix("Bearer "))
+        .map(|t| t.to_string())
+        .ok_or(StatusCode::UNAUTHORIZED)?;
 
     let state = req
         .extensions()
@@ -53,7 +51,7 @@ pub async fn require_scope(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    let header = decode_header(token).map_err(|_| StatusCode::UNAUTHORIZED)?;
+    let header = decode_header(&token).map_err(|_| StatusCode::UNAUTHORIZED)?;
     let kid = header.kid.ok_or(StatusCode::UNAUTHORIZED)?;
     let jwk = jwks.find(&kid).ok_or(StatusCode::UNAUTHORIZED)?;
 
@@ -65,7 +63,7 @@ pub async fn require_scope(
     validation.set_issuer(&[format!("https://{}/", state.config.auth0_domain)]);
 
     let token_data =
-        decode::<Claims>(token, &decoding_key, &validation).map_err(|e| {
+        decode::<Claims>(&token, &decoding_key, &validation).map_err(|e| {
             tracing::warn!("JWT validation failed: {}", e);
             StatusCode::UNAUTHORIZED
         })?;
@@ -76,6 +74,6 @@ pub async fn require_scope(
     }
 
     req.extensions_mut().insert(token_data.claims);
-    req.extensions_mut().insert(token.to_string());
+    req.extensions_mut().insert(token);
     Ok(next.run(req).await)
 }
