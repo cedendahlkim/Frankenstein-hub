@@ -17,7 +17,12 @@ export const auth0 = initAuth0({
   session: {
     cookie: {
       sameSite: 'lax',
+      secure: false,
     },
+  },
+  transactionCookie: {
+    sameSite: 'lax',
+    secure: false,
   },
   httpTimeout: 10000,
 });
