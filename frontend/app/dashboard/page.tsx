@@ -167,7 +167,7 @@ export default function Dashboard() {
                 isConnected={activeHasGoogle}
                 onConnect={() =>
                   (window.location.href =
-                    '/api/auth/login?connection=google-oauth2')
+                    '/api/auth/login?connection=google-oauth2&returnTo=/dashboard')
                 }
                 onInvoke={() =>
                   invokeHandler('/agents/analyst/execute', 'analyst')
@@ -180,8 +180,7 @@ export default function Dashboard() {
                 description="Generates and publishes content via GitHub. High-value publish actions require Step-Up MFA."
                 isConnected={activeHasGithub}
                 onConnect={() =>
-                  (window.location.href =
-                    '/api/auth/login?connection=github')
+                  (window.location.href = `/api/connect/github?sub=${encodeURIComponent(user?.sub || '')}`)
                 }
                 onInvoke={() =>
                   invokeHandler('/agents/creativist/draft', 'creativist')
