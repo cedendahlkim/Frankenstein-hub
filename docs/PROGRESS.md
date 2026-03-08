@@ -18,9 +18,45 @@
 5. **Backend startar** — `cargo run` OK, ansluter till DB, kör migrationer, `/health` svarar `OK`
 6. **Frontend dev-server** — `next dev` körs på port 3000
 
+### UI Polish ✅
+
+7. **Landing page uppgraderad:**
+   - Animerad gradient-bakgrund med pulsande orbs
+   - `AuthFlowDiagram` komponent — animerad 4-stegs auth-flow (Token Vault → Step-Up → CIBA → Authorized)
+   - `ActivityLog` komponent — simulerad realtids-auditlogg som visar alla tre agentflöden
+   - Feature cards med faktiska `grant_type`-värden i monospace
+   - Arkitektursektion med sub-agents + tech stack
+   - Footer med hackathon-branding
+8. **AgentCard refaktorerad:**
+   - Statisk Tailwind-färgkarta istället för dynamiska strängar (fixar CSS-purge)
+   - Subtila hover-glöd-effekter och corner glow
+   - Emoji-ikoner per agent (🔬🎨🔍)
+   - Provider-badge med färgkodad bakgrund
+   - Publish-knapp (sekundär, gul) för Creativist med Step-Up MFA
+9. **Dashboard förbättrad:**
+   - `DashboardLog` komponent — typade loggposter i realtid
+   - Agent-invokationer genererar logghändelser (INVOKE, STEP_UP, ERROR, COMPLETE)
+   - Session-start loggas automatiskt vid inloggning
+10. **Scrollbar-styling** — tunna scrollbars i aktivitetsloggar
+
+### Git-historik (Session 2)
+- `19dc296` fix: resolve Rust compile errors and verify full stack
+- `71b5079` feat: polish UI with animated landing page and improved agent cards
+- `e275a15` feat: add real-time activity log to dashboard
+- `ee5c670` feat: add publish button to Creativist + scrollbar styling
+
 ### Kvarvarande varningar (icke-blockerande)
 - 5 dead_code-varningar i Rust (oanvända structs/funktioner som kommer användas senare)
 - `sqlx-postgres v0.7.4` future-incompat warning (uppgradera till 0.8 senare)
+
+### Prioriterad att-göra-lista
+| # | Uppgift | Prioritet | Status |
+| --- | --- | --- | --- |
+| 1 | Konfigurera Auth0-tenant (AUTH0_SETUP.md) | 🔴 Hög | ⬜ |
+| 2 | Fyll i .env-filer med riktiga credentials | 🔴 Hög | ⬜ |
+| 3 | End-to-end test: Login → Dashboard → Agent invoke | 🟡 Medium | ⬜ |
+| 4 | Deploy till VPS (app.gracestack.se) | 🟡 Medium | ⬜ |
+| 5 | Devpost submission + video | 🟢 Låg | ⬜ |
 
 ## Session 1 (2026-03-08)
 
